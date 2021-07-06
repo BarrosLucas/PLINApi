@@ -45,7 +45,7 @@ __decorate([
 ], Client.prototype, "name", void 0);
 __decorate([
     type_graphql_1.Field(() => String),
-    typeorm_1.Column({ nullable: false }),
+    typeorm_1.Column({ nullable: false, unique: true }),
     __metadata("design:type", String)
 ], Client.prototype, "userName", void 0);
 __decorate([

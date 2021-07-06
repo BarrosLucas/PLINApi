@@ -115,9 +115,25 @@ class ClientResolver {
             return result;
         });
     }
-    login(_ctx, userName, password) {
+    login({ req }, userName, password) {
         return __awaiter(this, void 0, void 0, function* () {
             const client = yield Client_1.Client.findOne({ where: { userName: userName } });
+            if (userName.length <= 2) {
+                return {
+                    errors: [{
+                            field: 'username',
+                            message: "length must be greater than 2"
+                        }]
+                };
+            }
+            if (password.length <= 3) {
+                return {
+                    errors: [{
+                            field: 'username',
+                            message: "password must be greater than 2"
+                        }]
+                };
+            }
             if (!client) {
                 return {
                     errors: [{
@@ -135,6 +151,7 @@ class ClientResolver {
                         }]
                 };
             }
+            req.session.clientId = client.id;
             return {
                 client: client
             };

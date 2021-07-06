@@ -4,6 +4,12 @@ import { MyContext } from "../types";
 import { getConnection } from "typeorm";
 import argon2 from 'argon2'
 
+declare module "express-session" { // about this module - there was a issue with session
+    interface Session {            // recognizing new elements in it, so its needed to do
+      clientId: number;            // this black magic here
+    }
+  }
+
 // ObjectTypes
 @ObjectType()
 class FieldError {
@@ -114,12 +120,30 @@ export class ClientResolver {
 
     @Mutation(() => ClientResponse)
     async login(
-        @Ctx() _ctx: MyContext,
+        @Ctx() {req}: MyContext,
         @Arg('userName', () => String) userName: string, 
         @Arg('password', () => String) password: string,
 
     ): Promise<ClientResponse>{
         const client = await Client.findOne({where: {userName: userName}})
+
+        if(userName.length <= 2){
+            return {
+                errors: [{
+                    field: 'username',
+                    message: "length must be greater than 2"
+                }]
+            }
+        }
+
+        if(password.length <= 3){
+            return {
+                errors: [{
+                    field: 'username',
+                    message: "password must be greater than 2"
+                }]
+            }
+        }
 
         if (!client){
             return {
@@ -140,6 +164,8 @@ export class ClientResolver {
                 }]
             }
         }
+
+        req.session.clientId = client.id
 
 
         return {

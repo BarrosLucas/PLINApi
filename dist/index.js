@@ -17,14 +17,33 @@ const express_1 = __importDefault(require("express"));
 const apollo_server_express_1 = require("apollo-server-express");
 const type_graphql_1 = require("type-graphql");
 const typeorm_1 = require("typeorm");
-const seed_1 = require("./seed");
 const hello_1 = require("./resolvers/hello");
 const clientResolver_1 = require("./resolvers/clientResolver");
+const redis_1 = __importDefault(require("redis"));
+const express_session_1 = __importDefault(require("express-session"));
+const connect_redis_1 = __importDefault(require("connect-redis"));
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
-        const dbConnection = yield typeorm_1.createConnection();
-        yield seed_1.seedDb(dbConnection).catch(err => console.log(err));
+        yield typeorm_1.createConnection();
         const app = express_1.default();
+        const RedisStore = connect_redis_1.default(express_session_1.default);
+        const redisCLient = redis_1.default.createClient();
+        app.use(express_session_1.default({
+            name: 'qid',
+            store: new RedisStore({
+                client: redisCLient,
+                disableTouch: true
+            }),
+            cookie: {
+                maxAge: 1000 * 60 * 60 * 24 * 365,
+                httpOnly: true,
+                sameSite: 'lax',
+                secure: false
+            },
+            secret: "cjhgknlicjli",
+            resave: false,
+            saveUninitialized: false
+        }));
         const apolloServer = new apollo_server_express_1.ApolloServer({
             schema: yield type_graphql_1.buildSchema({
                 resolvers: [hello_1.HelloResolver, clientResolver_1.ClientResolver],

@@ -19,7 +19,7 @@ export class Client extends BaseEntity {
     name: string;
 
     @Field(() => String)
-    @Column({nullable: false})
+    @Column({nullable: false, unique: true})
     userName: string;
 
     @Field(() => String)
