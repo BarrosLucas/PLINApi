@@ -57,10 +57,23 @@ export class ClientResolver {
         
     }
 
+    @Query(() => Client, {nullable: true})
+    async currentUser(
+        @Ctx() {req}: MyContext
+    ): Promise<Client | null>  {
+        if (!req.session.clientId) {
+            // User not logged in
+            return null
+        }
+
+        const client = await Client.findOne({where: {id: req.session.clientId}})
+        return client! // Exclamation is to tell that if we got here, clint will never be undefined
+    }
+
     // Mutations
     @Mutation(() => ClientResponse)
     async createClient(
-        @Ctx() _ctx: MyContext,
+        @Ctx() {req}: MyContext,
         @Arg('name', () => String) name: string,
         @Arg('userName', () => String) userName: string,
         @Arg('cpf', () => String) cpf: string,
@@ -99,6 +112,9 @@ export class ClientResolver {
 
         const result = await newClient.save()
         .then(client => {
+
+            req.session.clientId = client.id // After register, lon in
+
             return {
                 client: client
             }

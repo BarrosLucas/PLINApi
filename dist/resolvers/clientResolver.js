@@ -71,7 +71,16 @@ class ClientResolver {
             return client;
         });
     }
-    createClient(_ctx, name, userName, cpf, password, photo, phone) {
+    currentUser({ req }) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!req.session.clientId) {
+                return null;
+            }
+            const client = yield Client_1.Client.findOne({ where: { id: req.session.clientId } });
+            return client;
+        });
+    }
+    createClient({ req }, name, userName, cpf, password, photo, phone) {
         return __awaiter(this, void 0, void 0, function* () {
             if (userName.length <= 2) {
                 return {
@@ -99,6 +108,7 @@ class ClientResolver {
             });
             const result = yield newClient.save()
                 .then(client => {
+                req.session.clientId = client.id;
                 return {
                     client: client
                 };
@@ -198,6 +208,13 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], ClientResolver.prototype, "getClient", null);
+__decorate([
+    type_graphql_1.Query(() => Client_1.Client, { nullable: true }),
+    __param(0, type_graphql_1.Ctx()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], ClientResolver.prototype, "currentUser", null);
 __decorate([
     type_graphql_1.Mutation(() => ClientResponse),
     __param(0, type_graphql_1.Ctx()),

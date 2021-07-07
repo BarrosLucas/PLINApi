@@ -17,7 +17,7 @@ async function main() {
     const app = express() // Initialize express
 
     // Initilize redis
-    const RedisStore = connectRedis(session)
+    const RedisStore = connectRedis(session) // Connext to redis using express session
     const redisCLient = redis.createClient()
 
     app.use(session({
